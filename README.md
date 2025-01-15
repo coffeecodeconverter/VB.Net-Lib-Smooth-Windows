@@ -51,7 +51,7 @@ Determines the monitor index where a given form is located.
 Dim tempDict As Dictionary(Of String, Dictionary(Of String, Object)) = GetScreenInfo(Me)
 Dim tempString As String = FormatScreenInfo(tempDict)
 MessageBox.Show(tempString)
-
+```
 
 **## Core Module**
 ~~~~~~~~~~~~~~~~~~~~~
