@@ -467,4 +467,5 @@ Module smooth
         ' Convert the integer percentage to a double between 0.0 and 1.0
         form.Opacity = opacityPercentage / 100.0
     End Sub
+End Module
 ~~~~~~~~~~~~~~~~~~~~~
