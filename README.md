@@ -1,13 +1,17 @@
 # VB.Net-Smooth-Windows
-Smoothly Animate WinForms - Position, Resize, Fade, Module Code - works with any project 
+Smoothly Animate WinForms - Position, Resize, Fade, and Chain effects together. 
+Single VB.Module  - works with any project using .NET Framework 4.5 or above.  
 
 
 Introducing Smooth Windows for VB.Net<br>
 
 # Smooth Form Movement and Resizing Module
 
-A module designed to simplify the process of moving and resizing a form with smooth animations, including fading transparency. It allows resizing from a specific corner of the window for a more visually appealing effect, based on the screen quadrant.  
-Compatible with .NET Framework 4.0 and above.
+A module designed to simplify the process of moving and resizing a form with smooth animations, including fading transparency. <br>
+It allows resizing from a specific corner of the window for a more visually appealing effect, based on the screen quadrant.  
+it has many easing functions too. 
+both duration and Easing functions can be overridden per function call to blend the animations into a larger effect. 
+
 
 ## Usage
 
@@ -26,6 +30,9 @@ Returns the position of the taskbar as `"Top"`, `"Bottom"`, `"Left"`, or `"Right
 
 #### `Smooth.GetTaskbarThickness()`
 Returns an integer representing the thickness of the taskbar, either in height or width depending on orientation.
+
+#### `Smooth.Wait(milliseconds)`
+Non-Blocking Delay, can be used as a sleep command without blocking UI, but also for chaining multiple animations together to create effects
 
 #### `Smooth.SetWindowTransparency(ByRef form, opacityInt1to100)`
 Sets the transparency level of a form, where opacity is an integer value between 1 and 100.
@@ -55,6 +62,8 @@ MessageBox.Show(tempString)
 
 **## Core Module**
 ~~~~~~~~~~~~~~~~~~~~~
+
+
 Module smooth
 
     ' Global variables
@@ -67,7 +76,7 @@ Module smooth
     '   ========================================================
     Public animationEnabled As Boolean = True                   ' Disable for better performance. The MoveWindow() Function is still useful for resizing and positioning
     Public animationTimerInterval As Integer = 10               ' Lower means smoother animation but higher CPU usage, i.e 16 = 60fps
-    Public animationDuration As Integer = 800                   ' Duration in milliseconds
+    Public animationDuration As Integer = 800                   ' Default Duration in milliseconds, but can be overridden in the Smooth.MoveWindow() function call
     Public animationEasingFunction As String = "EaseOutQuart"   ' Change the easing function - EaseInOutSin, EaseOutCubic, EaseOutQuad, EaseOutQuart
     Public globalWindowMargin As Integer = 10                   ' Margin (pixels) from screen edges and taskbar
     '   ========================================================
@@ -91,8 +100,11 @@ Module smooth
     Public Event AnimationFinished As EventHandler
 
 
+
+
+
     ' Move and/or Resize any Form 
-    Public Sub MoveWindow(ByRef form As Form, ByVal newX As Integer, ByVal newY As Integer, Optional ByVal newWidth As Integer = -1, Optional ByVal newHeight As Integer = -1, Optional ByVal opacityStart As Integer = Nothing, Optional ByVal opacityEnd As Integer = Nothing, Optional ByVal callbackFunc As Action = Nothing)
+    Public Sub MoveWindow(ByRef form As Form, ByVal newX As Integer, ByVal newY As Integer, Optional ByVal newWidth As Integer = -1, Optional ByVal newHeight As Integer = -1, Optional ByVal opacityStart As Integer = Nothing, Optional ByVal opacityEnd As Integer = Nothing, Optional duration As Integer = 0, Optional easingFunc As String = "", Optional ByVal callbackFunc As Action = Nothing)
         ' Ensure both a start and end were provided, otherwise override to full opacity
         If opacityStart <= 0 Or opacityEnd <= 0 Then
             opacityStart = 100
@@ -120,6 +132,43 @@ Module smooth
             targetHeight = newHeight
         Else
             targetHeight = form.Height
+        End If
+
+        If duration = 0 Then
+            animationDuration = 800
+        ElseIf duration > 0 Then
+            animationDuration = duration
+        End If
+
+        If Not String.IsNullOrEmpty(easingFunc) Then
+            Select Case easingFunc
+                Case "EaseInOutSin"
+                    animationEasingFunction = "EaseInOutSin"
+                Case "EaseOutCubic"
+                    animationEasingFunction = "EaseOutCubic"
+                Case "EaseOutQuad"
+                    animationEasingFunction = "EaseOutQuad"
+                Case "EaseOutQuart"
+                    animationEasingFunction = "EaseOutQuart"
+                Case "EaseOutBounce"
+                    animationEasingFunction = "EaseOutBounce"
+                Case "EaseOutElastic"
+                    animationEasingFunction = "EaseOutElastic"
+                Case "EaseOutQuint"
+                    animationEasingFunction = "EaseOutQuint"
+                Case "EaseInOutQuad"
+                    animationEasingFunction = "EaseInOutQuad"
+                Case "EaseInOutCubic"
+                    animationEasingFunction = "EaseInOutCubic"
+                Case "EaseInOutQuart"
+                    animationEasingFunction = "EaseInOutQuart"
+                Case "EaseInOutQuint"
+                    animationEasingFunction = "EaseInOutQuint"
+                Case "EaseOutBack"
+                    animationEasingFunction = "EaseOutBack"
+                Case Else
+                    animationEasingFunction = "EaseOutQuart"
+            End Select
         End If
 
         ' Record the start values
@@ -269,6 +318,10 @@ Module smooth
     End Sub
 
 
+
+
+
+
     ' Functions called by Raised Events - add any code you like to expand on this module code
     Private Sub OnAnimationStarted(sender As Object, e As EventArgs)
         'Debug.WriteLine("Animation Started!")
@@ -281,6 +334,11 @@ Module smooth
     End Sub
 
 
+
+
+    ' overrides and insists topLeft Quadrant if both moving AND resizing the form
+    ' Becasue visually, its idential to growing from a specific corner due to the X and Y moving to cancel out the resize
+    ' creating the illusion that its growing from the correct corner based on its quadrant, but its techncially always growing from topleft
     Private Sub AnimationTick(sender As Object, e As EventArgs)
         ' progress of animation
         Dim progress As Double = (DateTime.Now - startTime).TotalMilliseconds / animationDuration
@@ -348,6 +406,11 @@ Module smooth
     End Sub
 
 
+
+
+
+
+
     ' To Determine which screen Quadrant the centre point falls in 
     Private Function GetFormCenterPoint(ByRef frm As Form) As Point
         Dim centerX As Integer = frm.Left + (frm.Width \ 2)
@@ -373,6 +436,10 @@ Module smooth
             Return "BottomRight"
         End If
     End Function
+
+
+
+
 
 
 
@@ -421,39 +488,10 @@ Module smooth
     End Function
 
 
-    ' change easing function across the board
-    Private Function easingFunctionToUse(passedT As Single) As Single
-        Select Case animationEasingFunction
-            Case "EaseInOutSin"
-                Return EaseInOutSin(passedT)
-            Case "EaseOutCubic"
-                Return EaseOutCubic(passedT)
-            Case "EaseOutQuad"
-                Return EaseOutQuad(passedT)
-            Case "EaseOutQuart"
-                Return EaseOutQuart(passedT)
-            Case Else
-                Return EaseInOutSin(passedT)
-        End Select
-    End Function
 
 
-    ' Easing functions
-    Private Function EaseOutCubic(t As Single) As Single
-        Return 1 - Math.Pow(1 - t, 3)
-    End Function
 
-    Private Function EaseInOutSin(t As Single) As Single
-        Return 0.5 * (1 - Math.Cos(Math.PI * t))
-    End Function
 
-    Private Function EaseOutQuad(t As Single) As Single
-        Return 1 - (1 - t) * (1 - t)
-    End Function
-
-    Private Function EaseOutQuart(t As Single) As Single
-        Return 1 - Math.Pow(1 - t, 4)
-    End Function
 
 
     Public Sub SetWindowTransparency(ByRef form As Form, opacityPercentage As Integer)
@@ -467,5 +505,150 @@ Module smooth
         ' Convert the integer percentage to a double between 0.0 and 1.0
         form.Opacity = opacityPercentage / 100.0
     End Sub
+
+
+
+
+
+
+    Public Async Function Wait(milliseconds As Integer) As Task
+        ' Asynchronously wait for the specified time without blocking UI
+        Await Task.Delay(milliseconds)
+
+        ' Do something after the delay here
+    End Function
+
+
+
+
+
+
+
+
+
+    ' Change easing function across the board
+    Private Function easingFunctionToUse(passedT As Single) As Single
+        Select Case animationEasingFunction
+            Case "EaseInOutSin"
+                Return EaseInOutSin(passedT)
+            Case "EaseOutCubic"
+                Return EaseOutCubic(passedT)
+            Case "EaseOutQuad"
+                Return EaseOutQuad(passedT)
+            Case "EaseOutQuart"
+                Return EaseOutQuart(passedT)
+            Case "EaseOutBounce"
+                Return EaseOutBounce(passedT)
+            Case "EaseOutElastic"
+                Return EaseOutElastic(passedT)
+            Case "EaseOutQuint"
+                Return EaseOutQuint(passedT)
+            Case "EaseInOutQuad"
+                Return EaseInOutQuad(passedT)
+            Case "EaseInOutCubic"
+                Return EaseInOutCubic(passedT)
+            Case "EaseInOutQuart"
+                Return EaseInOutQuart(passedT)
+            Case "EaseInOutQuint"
+                Return EaseInOutQuint(passedT)
+            Case "EaseOutBack"
+                Return EaseOutBack(passedT)
+            Case Else
+                Return EaseOutQuart(passedT)
+        End Select
+    End Function
+
+
+
+    ' Easing functions
+
+    Private Function EaseInOutSin(t As Single) As Single
+        Return 0.5 * (1 - Math.Cos(Math.PI * t))
+    End Function
+
+    ' --- EaseOut (Mild to Dramatic) ---
+
+    Private Function EaseOutQuad(t As Single) As Single
+        Return 1 - (1 - t) * (1 - t)
+    End Function
+
+    Private Function EaseOutCubic(t As Single) As Single
+        Return 1 - Math.Pow(1 - t, 3)
+    End Function
+
+    Private Function EaseOutQuart(t As Single) As Single
+        Return 1 - Math.Pow(1 - t, 4)
+    End Function
+
+    Private Function EaseOutQuint(t As Single) As Single
+        Return 1 - Math.Pow(1 - t, 5)
+    End Function
+
+    ' --- EaseInOut (Mild to Dramatic) ---
+
+    Private Function EaseInOutQuad(t As Single) As Single
+        If t < 0.5 Then
+            Return 2 * t * t
+        Else
+            Return 1 - Math.Pow(-2 * t + 2, 2) / 2
+        End If
+    End Function
+
+    Private Function EaseInOutCubic(t As Single) As Single
+        If t < 0.5 Then
+            Return 4 * t * t * t
+        Else
+            Return 1 - Math.Pow(-2 * t + 2, 3) / 2
+        End If
+    End Function
+
+    Private Function EaseInOutQuart(t As Single) As Single
+        If t < 0.5 Then
+            Return 8 * t * t * t * t
+        Else
+            Return 1 - Math.Pow(-2 * t + 2, 4) / 2
+        End If
+    End Function
+
+    Private Function EaseInOutQuint(t As Single) As Single
+        If t < 0.5 Then
+            Return 16 * t * t * t * t * t
+        Else
+            Return 1 - Math.Pow(-2 * t + 2, 5) / 2
+        End If
+    End Function
+
+    ' --- Bounce (Mild to Dramatic) ---
+
+    Private Function EaseOutBounce(t As Single) As Single
+        If t < (1 / 2.75) Then
+            Return 7.5625 * t * t
+        ElseIf t < (2 / 2.75) Then
+            t -= (1.5 / 2.75)
+            Return 7.5625 * t * t + 0.75
+        ElseIf t < (2.5 / 2.75) Then
+            t -= (2.25 / 2.75)
+            Return 7.5625 * t * t + 0.9375
+        Else
+            t -= (2.625 / 2.75)
+            Return 7.5625 * t * t + 0.984375
+        End If
+    End Function
+
+    ' --- Elastic (Mild to Dramatic) ---
+
+    Private Function EaseOutElastic(t As Single) As Single
+        If t = 0 Then Return 0
+        If t = 1 Then Return 1
+        Dim p As Single = 0.3
+        Dim s As Single = p / 4
+        Return Math.Pow(2, -10 * t) * Math.Sin((t - s) * (2 * Math.PI) / p) + 1
+    End Function
+
+
+    Private Function EaseOutBack(t As Single) As Single
+        Dim s As Single = 1.70158
+        Return 1 + s * Math.Pow(t - 1, 3) + s * Math.Pow(t - 1, 2)
+    End Function
 End Module
 ~~~~~~~~~~~~~~~~~~~~~
