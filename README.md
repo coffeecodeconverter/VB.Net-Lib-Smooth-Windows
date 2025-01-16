@@ -24,7 +24,7 @@ Displays a dynamic form for testing and exploring the module out of the box. Thi
 
 The primary function for moving and/or resizing a window, adjusting its opacity, and animating the process is:
 
-#### `Smooth.MoveWindow(ByRef Form, newX, newY, optional newWidth, optional newHeight, optional opacityStart, optional opacityEnd, optional callbackFunction)`
+#### `Smooth.MoveWindow(ByRef Form, newX, newY, optional newWidth, optional newHeight, optional opacityStart, optional opacityEnd, optional duration, optional easingFunction, optional callbackFunction)`
 <br>
 <br>
 
