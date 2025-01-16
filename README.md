@@ -19,9 +19,13 @@ both duration and Easing functions can be overridden per function call to blend 
 
 #### `Smooth.CreateDynamicForm()`
 Displays a dynamic form for testing and exploring the module out of the box. This function can be removed when importing the module into your own projects.
+<Br>
+<br>
+
+The primary function for moving and/or resizing a window, adjusting its opacity, and animating the process is:
 
 #### `Smooth.MoveWindow(ByRef Form, newX, newY, optional newWidth, optional newHeight, optional opacityStart, optional opacityEnd, optional callbackFunction)`
-The primary function responsible for moving and/or resizing a window, adjusting its opacity, and animating the process.
+
 
 ### Other Available Functions
 
