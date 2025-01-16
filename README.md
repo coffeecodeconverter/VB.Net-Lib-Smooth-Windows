@@ -67,7 +67,8 @@ MessageBox.Show(tempString)
 <br>
 <br>
 <br>
-**## Core Module**
+
+## Core Module
 ~~~~~~~~~~~~~~~~~~~~~
 
 
