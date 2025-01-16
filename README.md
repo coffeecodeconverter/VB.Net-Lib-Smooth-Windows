@@ -25,7 +25,8 @@ Displays a dynamic form for testing and exploring the module out of the box. Thi
 The primary function for moving and/or resizing a window, adjusting its opacity, and animating the process is:
 
 #### `Smooth.MoveWindow(ByRef Form, newX, newY, optional newWidth, optional newHeight, optional opacityStart, optional opacityEnd, optional callbackFunction)`
-
+<br>
+<br>
 
 ### Other Available Functions
 
@@ -63,7 +64,9 @@ Dim tempDict As Dictionary(Of String, Dictionary(Of String, Object)) = GetScreen
 Dim tempString As String = FormatScreenInfo(tempDict)
 MessageBox.Show(tempString)
 ```
-
+<br>
+<br>
+<br>
 **## Core Module**
 ~~~~~~~~~~~~~~~~~~~~~
 
